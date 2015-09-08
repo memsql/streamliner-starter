@@ -22,27 +22,37 @@ class ConstantExtractor extends SimpleByteArrayExtractor {
   }
 }
 
+// An Extractor can also be configured with the config blob that is provided in MemSQL Ops.
+class ConfigurableConstantExtractor extends SimpleByteArrayExtractor {
+  override def nextRDD(sparkContext: SparkContext, config: UserExtractConfig, batchInterval: Long, logger: Logger): Option[RDD[Array[Byte]]] = {
+    logger.log(Level.INFO, "emitting a constant RDD")
+
+    val start = config.getConfigInt("start").getOrElse(1)
+    val end = config.getConfigInt("end").getOrElse(5)
+    Some(sparkContext.parallelize(List.range(start, end).map(byteUtils.intToBytes)))
+  }
+}
+
 // A more complex Extractor which maintains some state can be implemented using the initialize and cleanup methods.
 class SequenceExtractor extends SimpleByteArrayExtractor {
   var i: Int = Int.MinValue
 
   override def initialize(sparkContext: SparkContext, config: UserExtractConfig, batchInterval: Long, logger: Logger): Unit = {
-    logger.log(Level.INFO, "initializing the sequence")
+    i = config.getConfigInt("sequence", "initial_value").getOrElse(0)
 
-    i = 0
+    logger.log(Level.INFO, s"initializing the sequence at $i")
   }
 
   override def cleanup(sparkContext: SparkContext, config: UserExtractConfig, batchInterval: Long, logger: Logger): Unit = {
     logger.log(Level.INFO, "cleaning up the sequence")
-
-    i = Int.MaxValue
   }
 
   override def nextRDD(sparkContext: SparkContext, config: UserExtractConfig, batchInterval: Long, logger: Logger): Option[RDD[Array[Byte]]] = {
-    logger.log(Level.INFO, "emitting a sequence RDD")
+    val sequenceSize = config.getConfigInt("sequence", "size").getOrElse(5)
+    logger.log(Level.INFO, s"emitting a sequence RDD from $i to ${i + sequenceSize}")
 
-    i += 5
-    Some(sparkContext.parallelize(List.range(i, i+5).map(byteUtils.intToBytes)))
+    i += sequenceSize
+    Some(sparkContext.parallelize(List.range(i - sequenceSize, i).map(byteUtils.intToBytes)))
   }
 }
 
