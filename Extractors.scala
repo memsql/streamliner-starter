@@ -13,13 +13,13 @@ import com.memsql.spark.etl.api._
 import com.memsql.spark.etl.api.configs._
 import com.memsql.spark.etl.utils._
 
-class NikitaExtractor extends SimpleExtractor {
+class ConstantExtractor extends SimpleByteArrayExtractor {
   override def nextRDD(sparkContext: SparkContext, config: PhaseConfig, batchInterval: Long, logger: Logger): Option[RDD[Array[Byte]]] = {
-    Some(sparkContext.parallelize(List(0).map(byteUtils.intToBytes)))
+    Some(sparkContext.parallelize(List(1,2,3,4,5).map(byteUtils.intToBytes)))
   }
 }
 
-class CarlExtractor extends SimpleExtractor {
+class SequenceExtractor extends SimpleByteArrayExtractor {
   var i: Int = Int.MinValue
 
   override def initialize(sparkContext: SparkContext, config: PhaseConfig, batchInterval: Long, logger: Logger): Unit = {
@@ -32,12 +32,12 @@ class CarlExtractor extends SimpleExtractor {
   }
 }
 
-class JoYoExtractor extends ByteArrayExtractor {
+class DStreamExtractor extends ByteArrayExtractor {
   override def extract(ssc: StreamingContext, extractConfig: PhaseConfig, batchInterval: Long, logger: Logger): InputDStream[Array[Byte]] = {
     new InputDStream[Array[Byte]](ssc) {
       override def start(): Unit = {}
       override def stop(): Unit = {}
-      override def compute(validTime: Time): Option[RDD[Array[Byte]]] = None
+      override def compute(validTime: Time): Option[RDD[Array[Byte]]] = Some(sparkContext.parallelize(List(0).map(byteUtils.intToBytes)))
     }
   }
 }
