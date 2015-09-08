@@ -24,7 +24,7 @@ class EvenNumbersOnlyExtractor extends SimpleByteArrayTransformer {
     val transformedRDD = filteredRDD.map(x => Row(x))
 
     // create a schema with a single non-nullable integer column named number
-    val schema = StructType(Array(StructField("number", IntType, true))
+    val schema = StructType(Array(StructField("number", IntegerType, true)))
 
     sqlContext.createDataFrame(transformedRDD, schema)
   }
