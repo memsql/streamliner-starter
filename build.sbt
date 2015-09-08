@@ -1,4 +1,4 @@
-resolvers += "LOCAL" at "file://"+Path.userHome.absolutePath+"/.m2/repository"
+resolvers += "memsql-internal" at "http://coreos-10.memcompute.com:8080/repository/internal"
 
 name := "memsql-spark-pipeline-starter"
 version := "0.0.1"

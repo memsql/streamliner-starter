@@ -14,7 +14,7 @@ import com.memsql.spark.etl.api.configs._
 import com.memsql.spark.etl.utils._
 
 class ConstantExtractor extends SimpleByteArrayExtractor {
-  override def nextRDD(sparkContext: SparkContext, config: PhaseConfig, batchInterval: Long, logger: Logger): Option[RDD[Array[Byte]]] = {
+  override def nextRDD(sparkContext: SparkContext, config: UserExtractConfig, batchInterval: Long, logger: Logger): Option[RDD[Array[Byte]]] = {
     Some(sparkContext.parallelize(List(1,2,3,4,5).map(byteUtils.intToBytes)))
   }
 }
@@ -22,11 +22,11 @@ class ConstantExtractor extends SimpleByteArrayExtractor {
 class SequenceExtractor extends SimpleByteArrayExtractor {
   var i: Int = Int.MinValue
 
-  override def initialize(sparkContext: SparkContext, config: PhaseConfig, batchInterval: Long, logger: Logger): Unit = {
+  override def initialize(sparkContext: SparkContext, config: UserExtractConfig, batchInterval: Long, logger: Logger): Unit = {
     i = 0
   }
 
-  override def nextRDD(sparkContext: SparkContext, config: PhaseConfig, batchInterval: Long, logger: Logger): Option[RDD[Array[Byte]]] = {
+  override def nextRDD(sparkContext: SparkContext, config: UserExtractConfig, batchInterval: Long, logger: Logger): Option[RDD[Array[Byte]]] = {
     i += 1
     Some(sparkContext.parallelize(List(i).map(byteUtils.intToBytes)))
   }
@@ -37,7 +37,7 @@ class DStreamExtractor extends ByteArrayExtractor {
     new InputDStream[Array[Byte]](ssc) {
       override def start(): Unit = {}
       override def stop(): Unit = {}
-      override def compute(validTime: Time): Option[RDD[Array[Byte]]] = Some(sparkContext.parallelize(List(0).map(byteUtils.intToBytes)))
+      override def compute(validTime: Time): Option[RDD[Array[Byte]]] = Some(ssc.sparkContext.parallelize(List(0).map(byteUtils.intToBytes)))
     }
   }
 }
