@@ -1,8 +1,5 @@
 SHELL := /bin/bash
 
-##############################
-# BUILD
-#
 VERSION := $(shell sbt 'export version' | tail -n 1)
 export VERSION
 
