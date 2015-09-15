@@ -6,17 +6,17 @@ import org.apache.spark.streaming._
 import org.apache.spark.streaming.dstream._
 import org.apache.spark.sql._
 import org.apache.spark.sql.types._
-import org.apache.log4j._
 import com.memsql.spark.context._
 import com.memsql.spark.connector._
 import com.memsql.spark.etl.api._
 import com.memsql.spark.etl.api.configs._
 import com.memsql.spark.etl.utils._
+import com.memsql.spark.etl.utils.PhaseLogger
 
 // The simplest implementation of an Extractor just provides a nextRDD method. This is useful for prototyping and debugging.
 class ConstantExtractor extends SimpleByteArrayExtractor {
-  override def nextRDD(sparkContext: SparkContext, config: UserExtractConfig, batchInterval: Long, logger: Logger): Option[RDD[Array[Byte]]] = {
-    logger.log(Level.INFO, "emitting a constant RDD")
+  override def nextRDD(sparkContext: SparkContext, config: UserExtractConfig, batchInterval: Long, logger: PhaseLogger): Option[RDD[Array[Byte]]] = {
+    logger.info("emitting a constant RDD")
 
     Some(sparkContext.parallelize(List(1,2,3,4,5).map(byteUtils.intToBytes)))
   }
@@ -24,8 +24,8 @@ class ConstantExtractor extends SimpleByteArrayExtractor {
 
 // An Extractor can also be configured with the config blob that is provided in MemSQL Ops.
 class ConfigurableConstantExtractor extends SimpleByteArrayExtractor {
-  override def nextRDD(sparkContext: SparkContext, config: UserExtractConfig, batchInterval: Long, logger: Logger): Option[RDD[Array[Byte]]] = {
-    logger.log(Level.INFO, "emitting a constant RDD")
+  override def nextRDD(sparkContext: SparkContext, config: UserExtractConfig, batchInterval: Long, logger: PhaseLogger): Option[RDD[Array[Byte]]] = {
+    logger.info("emitting a constant RDD")
 
     val start = config.getConfigInt("start").getOrElse(1)
     val end = config.getConfigInt("end").getOrElse(5)
@@ -37,19 +37,19 @@ class ConfigurableConstantExtractor extends SimpleByteArrayExtractor {
 class SequenceExtractor extends SimpleByteArrayExtractor {
   var i: Int = Int.MinValue
 
-  override def initialize(sparkContext: SparkContext, config: UserExtractConfig, batchInterval: Long, logger: Logger): Unit = {
+  override def initialize(sparkContext: SparkContext, config: UserExtractConfig, batchInterval: Long, logger: PhaseLogger): Unit = {
     i = config.getConfigInt("sequence", "initial_value").getOrElse(0)
 
-    logger.log(Level.INFO, s"initializing the sequence at $i")
+    logger.info(s"initializing the sequence at $i")
   }
 
-  override def cleanup(sparkContext: SparkContext, config: UserExtractConfig, batchInterval: Long, logger: Logger): Unit = {
-    logger.log(Level.INFO, "cleaning up the sequence")
+  override def cleanup(sparkContext: SparkContext, config: UserExtractConfig, batchInterval: Long, logger: PhaseLogger): Unit = {
+    logger.info("cleaning up the sequence")
   }
 
-  override def nextRDD(sparkContext: SparkContext, config: UserExtractConfig, batchInterval: Long, logger: Logger): Option[RDD[Array[Byte]]] = {
+  override def nextRDD(sparkContext: SparkContext, config: UserExtractConfig, batchInterval: Long, logger: PhaseLogger): Option[RDD[Array[Byte]]] = {
     val sequenceSize = config.getConfigInt("sequence", "size").getOrElse(5)
-    logger.log(Level.INFO, s"emitting a sequence RDD from $i to ${i + sequenceSize}")
+    logger.info(s"emitting a sequence RDD from $i to ${i + sequenceSize}")
 
     i += sequenceSize
     Some(sparkContext.parallelize(List.range(i - sequenceSize, i).map(byteUtils.intToBytes)))
@@ -58,8 +58,8 @@ class SequenceExtractor extends SimpleByteArrayExtractor {
 
 // Finally, an Extractor can be implemented using any existing InputDStream that works with Spark Streaming.
 class DStreamExtractor extends ByteArrayExtractor {
-  override def extract(ssc: StreamingContext, extractConfig: PhaseConfig, batchInterval: Long, logger: Logger): InputDStream[Array[Byte]] = {
-    logger.log(Level.INFO, "creating extractor from an InputDStream")
+  override def extract(ssc: StreamingContext, extractConfig: PhaseConfig, batchInterval: Long, logger: PhaseLogger): InputDStream[Array[Byte]] = {
+    logger.info("creating extractor from an InputDStream")
 
     new InputDStream[Array[Byte]](ssc) {
       override def start(): Unit = {}

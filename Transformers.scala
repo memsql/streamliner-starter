@@ -6,17 +6,16 @@ import org.apache.spark.streaming._
 import org.apache.spark.streaming.dstream._
 import org.apache.spark.sql._
 import org.apache.spark.sql.types._
-import org.apache.log4j._
 import com.memsql.spark.context._
 import com.memsql.spark.connector._
 import com.memsql.spark.etl.api._
 import com.memsql.spark.etl.api.configs._
-import com.memsql.spark.etl.utils._
+import com.memsql.spark.etl.utils.PhaseLogger
 
 // A Transformer implements the transform method which turns an RDD into a DataFrame.
 class EvenNumbersOnlyTransformer extends SimpleByteArrayTransformer {
-  override def transform(sqlContext: SQLContext, rdd: RDD[Array[Byte]], config: UserTransformConfig, logger: Logger): DataFrame = {
-    logger.log(Level.INFO, "transforming the RDD")
+  override def transform(sqlContext: SQLContext, rdd: RDD[Array[Byte]], config: UserTransformConfig, logger: PhaseLogger): DataFrame = {
+    logger.info("transforming the RDD")
 
     // transform the RDD into RDD[Row]
     val integerRDD = rdd.map(byteUtils.bytesToInt)
@@ -32,12 +31,12 @@ class EvenNumbersOnlyTransformer extends SimpleByteArrayTransformer {
 
 // A Transformer can also be configured with the config blob that is provided in MemSQL Ops.
 class ConfigurableNumberParityTransformer extends SimpleByteArrayTransformer {
-  override def transform(sqlContext: SQLContext, rdd: RDD[Array[Byte]], config: UserTransformConfig, logger: Logger): DataFrame = {
+  override def transform(sqlContext: SQLContext, rdd: RDD[Array[Byte]], config: UserTransformConfig, logger: PhaseLogger): DataFrame = {
     var keepEvenNumbers = config.getConfigBoolean("filter", "even").getOrElse(true)
     var keepOddNumbers = config.getConfigBoolean("filter", "odd").getOrElse(true)
     var columnName = config.getConfigString("table", "column_name").getOrElse("number")
 
-    logger.log(Level.INFO, "transforming the RDD")
+    logger.info("transforming the RDD")
 
     // transform the RDD into RDD[Row] using the configured filter
     val integerRDD = rdd.map(byteUtils.bytesToInt)
