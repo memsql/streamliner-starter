@@ -1,6 +1,6 @@
 package com.memsql.streamliner.starter
 
-import org.apache.spark.sql.types.{IntegerType, StructField, StructType}
+import org.apache.spark.sql.types._
 import org.apache.spark.sql.{Row, DataFrame, SQLContext}
 import org.apache.spark.rdd.RDD
 import com.memsql.spark.etl.api.{ UserTransformConfig, SimpleByteArrayTransformer }
