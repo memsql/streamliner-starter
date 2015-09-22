@@ -25,6 +25,7 @@ trait LocalSparkContext extends BeforeAndAfterEach { self: Suite =>
   @transient private var _sc: SparkContext = _
 
   val _sparkConf = new SparkConf(false)
+    .set("spark.ui.showConsoleProgress", "false")
 
   def sc: SparkContext = _sc
 
