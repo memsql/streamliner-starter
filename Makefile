@@ -16,3 +16,7 @@ clean:
 .PHONY: build
 build: clean
 	sbt assembly
+
+.PHONY: test
+test:
+	sbt test
