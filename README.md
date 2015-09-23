@@ -24,7 +24,7 @@ Get Started with MemSQL Spark Streamliner
 	make build
 	```
 
-4. The JAR will be localed within `target/scala-<version>/`. Upload the JAR into MemSQL Ops and start your custom pipeline.
+4. The JAR will be placed in `target/scala-<version>/`. Upload the JAR to MemSQL Ops and create a pipeline using your custom code.
 
 Read more on how to [create custom Spark Interface JARs](http://docs.memsql.com/latest/spark/memsql-spark-interface/) in our docs.
 
