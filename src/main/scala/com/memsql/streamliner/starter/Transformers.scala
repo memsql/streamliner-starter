@@ -1,23 +1,29 @@
 package com.memsql.streamliner.starter
 
-import org.apache.spark.sql.types._
 import org.apache.spark.sql.{Row, DataFrame, SQLContext}
-import org.apache.spark.rdd.RDD
-import com.memsql.spark.etl.api.{ UserTransformConfig, SimpleByteArrayTransformer }
+import org.apache.spark.sql.types._
+import com.memsql.spark.etl.api.{Transformer, PhaseConfig}
 import com.memsql.spark.etl.utils.PhaseLogger
 
-// This transformer expects an input RDD containing ints, and returns a
-// dataframe with one row per int
-class BasicTransformer extends SimpleByteArrayTransformer {
-  override def transform(sqlContext: SQLContext, rdd: RDD[Array[Byte]], config: UserTransformConfig, logger: PhaseLogger): DataFrame = {
-    logger.info("transforming the RDD")
+// A helper object to extract the first column of a schema
+object ExtractFirstStructField {
+  def unapply(schema: StructType): Option[(String, DataType, Boolean, Metadata)] = schema.fields match {
+    case Array(first: StructField, _*) => Some((first.name, first.dataType, first.nullable, first.metadata))
+  }
+}
 
-    // transform the RDD into RDD[Row]
-    val integerRDD = rdd.map(byteUtils.bytesToInt).map(Row(_))
+// This transformer expects an input DataFrame and returns it
+class BasicTransformer extends Transformer {
+  def transform(sqlContext: SQLContext, df: DataFrame, config: PhaseConfig, logger: PhaseLogger): DataFrame = {
+    logger.info("transforming the DataFrame")
 
-    // create a schema with a single non-nullable integer column named number
-    val schema = StructType(Array(StructField("number", IntegerType, true)))
+    // check that the first column is of type IntegerType and return its name
+    val column = df.schema match {
+      case ExtractFirstStructField(name: String, dataType: IntegerType, _, _) => name
+      case _ => throw new IllegalArgumentException("The first column of the input DataFrame should be IntegerType")
+    }
 
-    sqlContext.createDataFrame(integerRDD, schema)
+    // filter the dataframe, returning only even numbers
+    df.filter(s"$column % 2 = 0")
   }
 }
