@@ -1,5 +1,6 @@
 MemSQL Streamliner Starter
 ==========================
+[![Build Status](https://travis-ci.org/memsql/streamliner-starter.svg?branch=master)](https://travis-ci.org/memsql/streamliner-starter)
 
 This is a starter repository that you can use to build pipelines for [MemSQL Spark Streamliner](http://docs.memsql.com/latest/spark/).
 
