@@ -2,6 +2,8 @@ MemSQL Streamliner Starter
 ==========================
 [![Build Status](https://travis-ci.org/memsql/streamliner-starter.svg?branch=master)](https://travis-ci.org/memsql/streamliner-starter)
 
+**MemSQL Streamliner is a deprecated feature and will be removed in MemSQL 6.0**
+
 This is a starter repository that you can use to build pipelines for [MemSQL Spark Streamliner](http://docs.memsql.com/latest/spark/).
 
 MemSQL Spark Streamliner lets you build custom Spark pipelines to:
